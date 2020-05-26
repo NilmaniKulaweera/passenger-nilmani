@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/auth.dart';
 import 'package:transport_booking_system_passenger_mobile/views/shared_widgets/page_widget.dart';
-import 'package:transport_booking_system_passenger_mobile/views/pages/bus_details.dart';
+import 'package:transport_booking_system_passenger_mobile/views/pages/route_details.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -17,7 +17,7 @@ class _HomeState extends State<Home> {
 
   String startingDestination = '';
   String endingDestination = '';
-  String journeyDate = '';
+  String journeyDate = DateTime.now().toString();
 
   DateTime selectedDate = DateTime.now();
 
@@ -31,6 +31,7 @@ class _HomeState extends State<Home> {
     if (picked != null && picked != selectedDate)
       setState(() {
         selectedDate = picked;
+        journeyDate = selectedDate.toString();
       });
   }
 
@@ -155,7 +156,7 @@ class _HomeState extends State<Home> {
                         onPressed: () {
                           if (_formKey.currentState.validate()) {
                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => BusDetails(
+                              builder: (context) => RouteDetails(
                                 startingDestination: startingDestination,
                                 endingDestination: endingDestination,
                                 journeyDate: journeyDate,
