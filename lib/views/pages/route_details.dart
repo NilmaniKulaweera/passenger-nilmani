@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:transport_booking_system_passenger_mobile/controllers/authController.dart';
 import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
 import 'package:transport_booking_system_passenger_mobile/models/route.dart';
+import 'package:transport_booking_system_passenger_mobile/views/pages/trip_details.dart';
 
 class RouteDetails extends StatefulWidget {
   final String startingDestination;
@@ -183,6 +184,7 @@ class PartialRouteDetailTile extends StatelessWidget {
                     ),
                     color: Colors.green[900],
                     onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => TripDetails(routeId: route.routeId)));
                       // show turn details
                     },
                   ),

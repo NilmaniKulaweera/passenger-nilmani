@@ -124,6 +124,41 @@ class AuthController {
     catchError((error) => APIResponse<List<List<RouteData>>>(error: true, errorMessage: 'An error occured'));
   }
 
+  Future<APIResponse<List<BusTripData>>> getTurns(String routeId) async {
+    // get the details of the passenger who booked a particular seat
+    String url = Constants.SERVER;
+    List<BusTripData> turns = [];
+
+    return http.post(
+      '$url/getturnbyroute',
+      
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'routeId': routeId,
+      })
+    ).then ((response) {
+      if(response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        if (data["turns"] != null && data["turns"].length > 0){
+          for(var i=0; i<data["turns"].length;i++){
+            turns.add(BusTripData.fromJson(data["turns"][i]));
+          }
+          return APIResponse<List<BusTripData>>(data: turns);
+        } else {
+          return APIResponse<List<BusTripData>>(error: true, errorMessage: "No turns");
+        }
+      } 
+      if(response.statusCode == 400) {
+        final error = jsonDecode(response.body);
+        return APIResponse<List<BusTripData>>(error: true, errorMessage: error['error']);
+      }
+      return APIResponse<List<BusTripData>>(error: true, errorMessage: 'An error occured');
+    }).
+    catchError((error) => APIResponse<List<BusTripData>>(error: true, errorMessage: 'An error occured'));
+  }
+
   // APIResponse<List<BusTripData>> getBusTripDetails(String startingDestination, String endingDestination, String journeyDate) {
   //   // get the details of the buses when the starting city, ending destination, and journey date is given 
   //   List<BusSeat> busSeatDetails = [

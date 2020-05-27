@@ -15,7 +15,8 @@ class RouteData {
       departureStop: route['departure_stop'],
       arrivalStop: route['arrival_stop'], 
       status: route['status'],
-      routeId: route['routeId'],
+      // routeId: route['routeId'],
+      routeId: "1 Colombo Kandy",
     );
   }
 }
