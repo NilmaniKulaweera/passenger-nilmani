@@ -30,6 +30,7 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
   int count = 0;
   List<int> selectedSeatNumbers = [];
   int availableSeats = 0;
+  int totalAmount = 0;
 
   countAvailableSeats() {
     for(var i=0; i<busSeatDetails.length;i++){
@@ -39,17 +40,19 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
     }
   }
 
-  callBackIncrease(seatNumber) {
+  callBackIncrease(int seatNumber) {
     setState(() {
       count = count + 1;
       selectedSeatNumbers.add(seatNumber);
+      totalAmount = totalAmount + busSeatDetails[seatNumber-1].price;
     });
   }
 
-  callBackDecrease(seatNumber) {
+  callBackDecrease(int seatNumber) {
     setState(() {
       count = count - 1;
       selectedSeatNumbers.remove(seatNumber);
+      totalAmount = totalAmount - busSeatDetails[seatNumber-1].price;
     });
   }
 
@@ -156,7 +159,8 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
                           count: count, 
                           selectedSeatNumbers: selectedSeatNumbers,
                           busType: widget.busType,
-                          seatPrice: widget.seatPrice,
+                          totalPrice: totalAmount,
+                          //seatPrice: widget.seatPrice,
                         )));
                       } else if (count == 0) {
                         final result = await showDialog(
