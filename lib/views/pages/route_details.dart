@@ -5,10 +5,12 @@ import 'package:transport_booking_system_passenger_mobile/models/route.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/trip_details.dart';
 
 class RouteDetails extends StatefulWidget {
+  final String uid;
+  final String token;
   final String startingDestination;
   final String endingDestination;
   final String journeyDate;
-  RouteDetails({this.startingDestination, this.endingDestination, this.journeyDate});
+  RouteDetails({this.uid, this.token, this.startingDestination, this.endingDestination, this.journeyDate});
 
   @override
   _RouteDetailsState createState() => _RouteDetailsState();
@@ -107,7 +109,7 @@ class _RouteDetailsState extends State<RouteDetails> {
         shrinkWrap: true,
         itemCount: routeDetails.length,
         itemBuilder: (context, index) {
-          return FullRouteDetailTile(fullRouteData: routeDetails[index]);
+          return FullRouteDetailTile(uid: widget.uid, token: widget.token, fullRouteData: routeDetails[index]);
         }
       ),
     );
@@ -115,8 +117,10 @@ class _RouteDetailsState extends State<RouteDetails> {
 }
 
 class FullRouteDetailTile extends StatelessWidget {
+  final String uid;
+  final String token;
   final List<RouteData> fullRouteData;
-  FullRouteDetailTile({this.fullRouteData});
+  FullRouteDetailTile({this.uid, this.token, this.fullRouteData});
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +132,7 @@ class FullRouteDetailTile extends StatelessWidget {
         physics: ClampingScrollPhysics(),
         itemCount: fullRouteData.length,
         itemBuilder: (context, index) {
-          return PartialRouteDetailTile(route: fullRouteData[index]);
+          return PartialRouteDetailTile(uid: uid, token: token, route: fullRouteData[index]);
         }
       ),
     );
@@ -136,8 +140,10 @@ class FullRouteDetailTile extends StatelessWidget {
 }
 
 class PartialRouteDetailTile extends StatelessWidget {
+  final String uid;
+  final String token;
   final RouteData route;
-  PartialRouteDetailTile({this.route});
+  PartialRouteDetailTile({this.uid, this.token, this.route});
 
   @override
   Widget build(BuildContext context) {
@@ -182,9 +188,12 @@ class PartialRouteDetailTile extends StatelessWidget {
                         fontSize: 18.0,
                       ),
                     ),
-                    color: Colors.green[900],
+                    color: Colors.green[700],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)
+                    ),
                     onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => TripDetails(routeId: route.routeId)));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => TripDetails(uid: uid, token: token, routeId: route.routeId)));
                       // show turn details
                     },
                   ),

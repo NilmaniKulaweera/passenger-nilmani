@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:transport_booking_system_passenger_mobile/controllers/authController.dart';
+import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
 import 'package:transport_booking_system_passenger_mobile/models/busSeat.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/bus_book.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/bus_layouts/bus_layout1.dart';
@@ -7,23 +9,31 @@ import 'package:transport_booking_system_passenger_mobile/views/pages/bus_layout
 import 'package:transport_booking_system_passenger_mobile/views/pages/bus_layouts/bus_layout4.dart';
 
 class BusLayoutWrapper extends StatefulWidget {
+  final String uid;
+  final String token;
+  final String tripId;
   final int seatPrice;
   final String busType;
-  final List<BusSeat>  busSeatDetails;
-  BusLayoutWrapper({this.seatPrice, this.busType,this.busSeatDetails});
+  BusLayoutWrapper({this.uid, this.token, this.tripId, this.seatPrice, this.busType});
 
   @override
   _BusLayoutWrapperState createState() => _BusLayoutWrapperState();
 }
 
 class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
+  final AuthController _auth = AuthController();
+  APIResponse<List<BusSeat>> _apiResponse;
+  bool _isLoading;
+  List<BusSeat>  busSeatDetails;
+  String errorMessage;
+  
   int count = 0;
   List<int> selectedSeatNumbers = [];
   int availableSeats = 0;
 
   countAvailableSeats() {
-    for(var i=0; i<widget.busSeatDetails.length;i++){
-      if (!widget.busSeatDetails[i].booked) {
+    for(var i=0; i<busSeatDetails.length;i++){
+      if (busSeatDetails[i].booking == null) {
         availableSeats = availableSeats + 1;
       }
     }
@@ -43,26 +53,42 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
     });
   }
 
+  _fetchSeatDetails() async {
+    setState(() { _isLoading = true; });
+    // get seat details of the particular trip
+    _apiResponse = await _auth.getBookings(widget.uid, widget.token, widget.tripId);
+    setState(() { 
+      if (_apiResponse.error){
+        _isLoading = false; 
+        errorMessage = _apiResponse.errorMessage;
+      } else {
+        _isLoading = false; 
+        busSeatDetails = _apiResponse.data;
+        countAvailableSeats();
+      }
+    });
+  }
+
   @override
   void initState() {
-    countAvailableSeats();
+    _fetchSeatDetails();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
       Widget layout; // return the layout according to the type of the bus
-      if (widget.busType == "Type1"){
-        layout = BusLayout1(busSeatDetails: widget.busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
+      if (widget.busType == "Luxury bus"){ //type 1 bus
+        layout = BusLayout1(busSeatDetails: busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
       }
-      if (widget.busType == "Type2"){
-        layout = BusLayout2(busSeatDetails: widget.busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
+      if (widget.busType == "AC bus"){ //type 2 bus
+        layout = BusLayout2(busSeatDetails: busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
       }
-      if (widget.busType == "Type3"){
-        layout = BusLayout3(busSeatDetails: widget.busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
+      if (widget.busType == "3x2 bus"){ //type 3 bus
+        layout = BusLayout3(busSeatDetails: busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
       }
-      if (widget.busType == "Type4"){
-        layout = BusLayout4(busSeatDetails: widget.busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
+      if (widget.busType == "2x2 bus"){ //type 4 bus
+        layout = BusLayout4(busSeatDetails: busSeatDetails, count: count, selectedSeatNumbers: selectedSeatNumbers, callBackIncrease: callBackIncrease, callBackDecrease: callBackDecrease);
       }
       return Scaffold(
         appBar: AppBar(
@@ -103,7 +129,8 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
             ),
             Expanded(
               flex: 8,
-              child: layout,
+              child: _isLoading? Center(child: CircularProgressIndicator()) : 
+              _apiResponse.error? Text(_apiResponse.errorMessage) : layout,
             ),
             Expanded(
               flex: 1,
@@ -181,8 +208,8 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
                 ),
               ),
             ),
-            // show 'add to waiting list' only if less than 4 seats are available
-            availableSeats > 3 ? SizedBox(height: 20) : Expanded(
+            // show 'add to waiting list' only if all the seats are not available
+            availableSeats > 0 ? SizedBox(height: 20) : Expanded(
               flex: 1,
               child: Container(
                 width: double.infinity,
@@ -201,6 +228,7 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
                       borderRadius: BorderRadius.circular(5)
                     ),
                     onPressed: () {
+                      print (availableSeats);
                       // Navigate to 'add to waiting list' page
                     },
                   ),

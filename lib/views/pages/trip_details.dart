@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:transport_booking_system_passenger_mobile/controllers/authController.dart';
 import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
 import 'package:transport_booking_system_passenger_mobile/models/busTripData.dart';
+import 'package:intl/intl.dart';
+import 'package:transport_booking_system_passenger_mobile/views/pages/bus_layout_wrapper.dart';
 
 class TripDetails extends StatefulWidget {
+  final String uid;
+  final String token;
   final String routeId;
-  TripDetails({this.routeId});
+  TripDetails({this.uid, this.token, this.routeId});
 
   @override
   _TripDetailsState createState() => _TripDetailsState();
@@ -63,10 +67,115 @@ class _TripDetailsState extends State<TripDetails> {
               textAlign: TextAlign.center,
             ),
           ),
-        ) : Card(
-          child: Text(trips.length.toString()), //show a single card for each turn
+        ) : 
+        ListView.builder(
+          itemCount: trips.length,
+          itemBuilder: (context, index) {
+            return TripTile(uid:widget.uid, token:widget.token, trip: trips[index]);
+          }
         ),
       ),
     );
   }
+}
+
+class TripTile extends StatelessWidget {
+  final String uid;
+  final String token;
+  final BusTripData trip;
+  TripTile({this.uid, this.token, this.trip});
+
+  _formatDateTime(String dateTime) {
+    DateTime dt = DateTime.parse(dateTime);
+    dt = dt.add(Duration(hours: 5,minutes: 30));
+    String date = DateFormat.yMd().format(dt);
+    String time = DateFormat.jm().format(dt);
+    return ('$date at $time');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.grey[200],
+      margin: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0.0),
+      child: Column(
+        children: <Widget>[
+          SizedBox(height: 15.0),
+          ListTile(
+            leading: Icon(
+              Icons.airport_shuttle,
+              color: Colors.grey[700],
+            ),
+            title: Text(
+                  '${trip.startStation} to ${trip.endStation}',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+          ),
+          ListTile(
+            title: Text(
+              'Departure Date and Time',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            subtitle: Text(
+              _formatDateTime(trip.departureTime),
+              style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ListTile(
+            title: Text(
+              'Arrival Date and Time',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            subtitle: Text(
+              _formatDateTime(trip.arrivalTime),
+              style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ListTile(
+            title: Text(
+              'Bus Type',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            subtitle: Text(
+              'LKR ${trip.busType}',
+              style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ListTile(
+            title: Text(
+              'Normal Seat Price',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            subtitle: Text(
+              'LKR ${trip.normalSeatPrice.toString()}',
+              style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+            ),
+          ),
+          FlatButton.icon( // to view the bookings of the current trip
+            label: Text(
+              'View Bookings',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5)
+            ),
+            color: Colors.green[700],
+            textColor: Colors.white,
+            icon: Icon(Icons.dashboard),
+            onPressed: () { 
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => BusLayoutWrapper(
+                  uid: uid, token: token, 
+                  tripId: trip.tripId, 
+                  seatPrice: trip.normalSeatPrice, 
+                  busType: trip.busType
+                )
+              ));   
+            },
+          ),
+          SizedBox(height: 15.0),
+        ],
+      ),
+    );
+  }             
 }

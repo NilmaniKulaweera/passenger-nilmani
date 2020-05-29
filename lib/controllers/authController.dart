@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
 import 'package:transport_booking_system_passenger_mobile/models/userData.dart';
@@ -63,6 +62,7 @@ class AuthController {
             print (UserData.fromJson(data).uid);
             print (UserData.fromJson(data).phoneNumber);
             print (UserData.fromJson(data).role);
+            print (UserData.fromJson(data).token);
             return APIResponse<UserData>(data: UserData.fromJson(data)); 
           } else {
             return APIResponse<UserData>(error: true, errorMessage: 'Not a valid passenger');
@@ -129,142 +129,98 @@ class AuthController {
     String url = Constants.SERVER;
     List<BusTripData> turns = [];
 
+    // return http.post(
+    //   '$url/getturnbyroute',
+      
+    //   headers: <String, String>{
+    //     'Content-Type': 'application/json; charset=UTF-8',
+    //   },
+    //   body: jsonEncode(<String, String>{
+    //     'routeId': routeId,
+    //   })
+    // ).then ((response) {
+    //   if(response.statusCode == 200) {
+    //     Map<String, dynamic> data = jsonDecode(response.body);
+    //     if (data["turns"] != null && data["turns"].length > 0){
+    //       for(var i=0; i<data["turns"].length;i++){
+    //         turns.add(BusTripData.fromJson(data["turns"][i]));
+    //       }
+    //       return APIResponse<List<BusTripData>>(data: turns);
+    //     } else {
+    //       return APIResponse<List<BusTripData>>(error: true, errorMessage: "No turns");
+    //     }
+    //   } 
+    //   if(response.statusCode == 400) {
+    //     final error = jsonDecode(response.body);
+    //     return APIResponse<List<BusTripData>>(error: true, errorMessage: error['error']);
+    //   }
+    //   return APIResponse<List<BusTripData>>(error: true, errorMessage: 'An error occured');
+    // }).
+    // catchError((error) => APIResponse<List<BusTripData>>(error: true, errorMessage: 'An error occured'));
+
+    BusTripData trip1 = BusTripData(
+      tripId: "rNJngMhzfcJO5qyOjM9I 2020-05-11T07:00:00.000Z",
+      departureTime: "2020-05-11T07:00:00.000Z",
+      startStation: "Colombo",
+      arrivalTime: "2020-05-11T11:00:00.000Z",
+      endStation: "Kandy",
+      normalSeatPrice: 159,
+      busType: "2x2 bus"
+    );
+    BusTripData trip2 = BusTripData(
+      tripId: "IB5CS5JD7foW57HVUVFo 2020-06-13T07:00:00.750Z",
+      departureTime: "2020-06-13T07:00:00.750Z",
+      startStation: "Kurunegala",
+      arrivalTime: "2020-06-13T10:15:00.750Z",
+      endStation: "Colombo",
+      normalSeatPrice: 200,
+      busType: "3x2 bus"
+    );
+    turns = [trip1, trip2];
+    return APIResponse<List<BusTripData>>(data: turns);
+  }
+
+  Future<APIResponse<List<BusSeat>>> getBookings(String uid, String loginToken, String tripId) async {
+    // get the current seat bookings of the trip
+    String url = Constants.SERVER;
+    String token = loginToken;
+    List<BusSeat> seatBookings = [];
+    List<BusSeat> orderedSeatBookings = [];
+    
     return http.post(
-      '$url/getturnbyroute',
+      '$url/getseatsdetailspassenger/$uid',
       
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, String>{
-        'routeId': routeId,
+        'turnId': tripId,
       })
     ).then ((response) {
       if(response.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(response.body);
-        if (data["turns"] != null && data["turns"].length > 0){
-          for(var i=0; i<data["turns"].length;i++){
-            turns.add(BusTripData.fromJson(data["turns"][i]));
-          }
-          return APIResponse<List<BusTripData>>(data: turns);
-        } else {
-          return APIResponse<List<BusTripData>>(error: true, errorMessage: "No turns");
+        for(var i=0; i<data["seats"].length;i++){
+          seatBookings.add(BusSeat.fromJson(data["seats"][i]));
         }
+        for (var i=0; i<seatBookings.length;i++){
+          for (var j=0; j<seatBookings.length;j++){
+            if (int.parse(seatBookings[j].seatID) == i+1){
+              orderedSeatBookings.add(seatBookings[j]);
+              break;
+            } 
+          }
+        }
+        return APIResponse<List<BusSeat>>(data: orderedSeatBookings);
       } 
       if(response.statusCode == 400) {
         final error = jsonDecode(response.body);
-        return APIResponse<List<BusTripData>>(error: true, errorMessage: error['error']);
+        return APIResponse<List<BusSeat>>(error: true, errorMessage: error['error']);
       }
-      return APIResponse<List<BusTripData>>(error: true, errorMessage: 'An error occured');
+      return APIResponse<List<BusSeat>>(error: true, errorMessage: 'An error occured');
     }).
-    catchError((error) => APIResponse<List<BusTripData>>(error: true, errorMessage: 'An error occured'));
-  }
+    catchError((error) => APIResponse<List<BusSeat>>(error: true, errorMessage: 'An error occured'));
+   }
 
-  // APIResponse<List<BusTripData>> getBusTripDetails(String startingDestination, String endingDestination, String journeyDate) {
-  //   // get the details of the buses when the starting city, ending destination, and journey date is given 
-  //   List<BusSeat> busSeatDetails = [
-  //     BusSeat(seatID: '1',booked: true),
-  //     BusSeat(seatID: '2',booked: true),
-  //     BusSeat(seatID: '3',booked: true),
-  //     BusSeat(seatID: '4',booked: true),
-  //     BusSeat(seatID: '5',booked: true),
-  //     BusSeat(seatID: '6',booked: false),
-  //     BusSeat(seatID: '7',booked: true),
-  //     BusSeat(seatID: '8',booked: true),
-  //     BusSeat(seatID: '9',booked: true),
-  //     BusSeat(seatID: '10',booked: true),
-  //     BusSeat(seatID: '11',booked: false),
-  //     BusSeat(seatID: '12',booked: true),
-  //     BusSeat(seatID: '13',booked: true),
-  //     BusSeat(seatID: '14',booked: true),
-  //     BusSeat(seatID: '15',booked: false),
-  //     BusSeat(seatID: '16',booked: true),
-  //     BusSeat(seatID: '17',booked: true),
-  //     BusSeat(seatID: '18',booked: true),
-  //     BusSeat(seatID: '19',booked: true),
-  //     BusSeat(seatID: '20',booked: true),
-  //     BusSeat(seatID: '21',booked: true),
-  //     BusSeat(seatID: '22',booked: true),
-  //     BusSeat(seatID: '23',booked: true),
-  //     BusSeat(seatID: '24',booked: true),
-  //     BusSeat(seatID: '25',booked: true),
-  //     BusSeat(seatID: '26',booked: true),
-  //     BusSeat(seatID: '27',booked: true),
-  //     BusSeat(seatID: '28',booked: true),
-  //     BusSeat(seatID: '29',booked: true),
-  //     BusSeat(seatID: '30',booked: true),
-  //     BusSeat(seatID: '31',booked: true),
-  //     BusSeat(seatID: '32',booked: true),
-  //     BusSeat(seatID: '33',booked: true),
-  //     BusSeat(seatID: '34',booked: true),
-  //     BusSeat(seatID: '35',booked: true),
-  //     BusSeat(seatID: '36',booked: true),
-  //     BusSeat(seatID: '37',booked: true),
-  //     BusSeat(seatID: '38',booked: true),
-  //     BusSeat(seatID: '39',booked: true),
-  //     BusSeat(seatID: '40',booked: true),
-  //     BusSeat(seatID: '41',booked: true),
-  //     BusSeat(seatID: '42',booked: true),
-  //     BusSeat(seatID: '43',booked: true),
-  //     BusSeat(seatID: '44',booked: true),
-  //     BusSeat(seatID: '45',booked: true),
-  //     BusSeat(seatID: '46',booked: false),
-  //     BusSeat(seatID: '47',booked: true),
-  //     BusSeat(seatID: '48',booked: false),
-  //     BusSeat(seatID: '49',booked: true),
-  //     BusSeat(seatID: '50',booked: true),
-  //     BusSeat(seatID: '51',booked: false),
-  //     BusSeat(seatID: '52',booked: true),
-  //     BusSeat(seatID: '53',booked: false),
-  //     BusSeat(seatID: '54',booked: true),
-  //   ];
-
-  //   List<BusTripData> buses = [
-  //     BusTripData(
-  //       busNumber: 'NA1023', 
-  //       busType: 'Type1', 
-  //       routeNumber: '87/759',
-  //       startingDestination: 'Colombo',
-  //       endingDestination: "Jaffna",
-  //       startingDateTime: '10 May - 8.00am',
-  //       endingDateTime: '10 May - 5.00pm',
-  //       seatPrice: 1700,
-  //       busSeatDetails: busSeatDetails.sublist(0,49),
-  //     ),
-  //     BusTripData(
-  //       busNumber: 'NA2323', 
-  //       busType: 'Type2', 
-  //       routeNumber: '87/759',
-  //       startingDestination: 'Colombo',
-  //       endingDestination: "Jaffna",
-  //       startingDateTime: '10 May - 11.00am',
-  //       endingDateTime: '10 May - 8.00pm',
-  //       seatPrice: 1500,
-  //       busSeatDetails: busSeatDetails.sublist(0,30),
-  //     ),
-  //     BusTripData(
-  //       busNumber: 'NA3523', 
-  //       busType: 'Type3', 
-  //       routeNumber: '87/759',
-  //       startingDestination: 'Colombo',
-  //       endingDestination: "Jaffna",
-  //       startingDateTime: '10 May - 5.00pm',
-  //       endingDateTime: '11 May - 2.00am',
-  //       seatPrice: 1000,
-  //       busSeatDetails: busSeatDetails,
-  //     ),
-  //     BusTripData(
-  //       busNumber: 'NA4623', 
-  //       busType: 'Type4', 
-  //       routeNumber: '87/759',
-  //       startingDestination: 'Colombo',
-  //       endingDestination: "Jaffna",
-  //       startingDateTime: '10 May - 10.00pm',
-  //       endingDateTime: '11 May - 7.00am',
-  //       seatPrice: 1000,
-  //       busSeatDetails: busSeatDetails.sublist(0,44),
-  //     ),
-  //   ];
-  //   return APIResponse<List<BusTripData>>(data: buses); 
-  // }
 }
 

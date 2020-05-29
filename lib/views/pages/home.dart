@@ -12,6 +12,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   SharedPreferences sharedPreferences;
   String uid;
+  String token;
   bool _isLoading = true;
   final _formKey = GlobalKey<FormState>();
 
@@ -52,6 +53,7 @@ class _HomeState extends State<Home> {
         _isLoading = true;
       });
       uid = sharedPreferences.getString("uid");
+      token = sharedPreferences.getString("token");
       print(uid);
       setState(() {
         _isLoading = false;
@@ -152,11 +154,16 @@ class _HomeState extends State<Home> {
                             fontSize: 18.0,
                           ),
                         ),
-                        color: Colors.green[900],
+                        color: Colors.green[700],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5)
+                        ),
                         onPressed: () {
                           if (_formKey.currentState.validate()) {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => RouteDetails(
+                                uid: uid,
+                                token: token,
                                 startingDestination: startingDestination,
                                 endingDestination: endingDestination,
                                 journeyDate: journeyDate,

@@ -29,13 +29,13 @@ class _SingleBusSeatState extends State<SingleBusSeat> {
             style: TextStyle(color: Colors.grey[900]),
           )
         ),
-        color: widget.busSeatDetails[widget.index].booked? Colors.green[500] : (pressAttention ? Colors.grey[700] : Colors.amber[400]),
+        color: widget.busSeatDetails[widget.index].status == "Unavailable" ? Colors.green[500] : (pressAttention ? Colors.grey[700] : Colors.amber[400]),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5)
         ),
         onPressed: () async {
           print (widget.count);
-          if (widget.busSeatDetails[widget.index].booked) {
+          if (widget.busSeatDetails[widget.index].status == "Unavailable") {
             final result = await showDialog(
               context: context,
               builder: (context) => AlertDialog(
