@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:transport_booking_system_passenger_mobile/views/pages/PaypalPayment.dart';
 
 class BusBook extends StatefulWidget {
   final int count;
@@ -19,9 +20,12 @@ class _BusBookState extends State<BusBook> {
   String boardingPlace = '';
   String destination = '';
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.green[900],
         title: Text(
@@ -158,6 +162,16 @@ class _BusBookState extends State<BusBook> {
                 onPressed: () {
                   if (_formKey.currentState.validate()) {
                     // direct to the payment gateway
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => PaypalPayment(
+                          onFinish: (number) async {
+                            // payment done
+                            print('order id: '+number);
+                          },
+                        ),
+                      ),
+                    );
                   }
                 },
               ),
