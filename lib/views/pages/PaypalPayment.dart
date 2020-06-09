@@ -8,8 +8,12 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class PaypalPayment extends StatefulWidget {
   final Function onFinish;
-
-  PaypalPayment({this.onFinish});
+  final String startingDestination;
+  final String endingDestination;
+  final String tripId;
+  final List<int> selectedSeatNumbers;
+  final int totalPrice;
+  PaypalPayment({this.onFinish, this.startingDestination, this.endingDestination, this.tripId, this.selectedSeatNumbers, this.totalPrice});
 
   @override
   State<StatefulWidget> createState() {
@@ -43,8 +47,7 @@ class PaypalPaymentState extends State<PaypalPayment> {
         accessToken = await services.getAccessToken();
 
         final transactions = getOrderParams();
-        final res =
-            await services.createPaypalPayment(transactions, accessToken);
+        final res = await services.createPaypalPayment(transactions, accessToken);
         if (res != null) {
           setState(() {
             checkoutUrl = res["approvalUrl"];
@@ -58,9 +61,7 @@ class PaypalPaymentState extends State<PaypalPayment> {
           duration: Duration(seconds: 10),
           action: SnackBarAction(
             label: 'Close',
-            onPressed: () {
-              // Some code to undo the change.
-            },
+            onPressed: () { },
           ),
         );
         _scaffoldKey.currentState.showSnackBar(snackBar);
@@ -68,74 +69,26 @@ class PaypalPaymentState extends State<PaypalPayment> {
     });
   }
 
-  // item name, price and quantity
-  String itemName = 'iPhone X';
-  String itemPrice = '1.99';
-  int quantity = 1;
-
   Map<String, dynamic> getOrderParams() {
-    List items = [
-      {
-        "name": itemName,
-        "quantity": quantity,
-        "price": itemPrice,
-        "currency": defaultCurrency["currency"]
-      }
-    ];
-
-
     // checkout invoice details
-    String totalAmount = '1.99';
-    String subTotalAmount = '1.99';
-    String shippingCost = '0';
-    int shippingDiscountCost = 0;
-    String userFirstName = 'Gulshan';
-    String userLastName = 'Yadav';
-    String addressCity = 'Delhi';
-    String addressStreet = 'Mathura Road';
-    String addressZipCode = '110014';
-    String addressCountry = 'India';
-    String addressState = 'Delhi';
-    String addressPhoneNumber = '+919990119091';
+    String totalAmount = '600.00';
 
     Map<String, dynamic> temp = {
       "intent": "sale",
       "payer": {"payment_method": "paypal"},
+      "application_context":{"shipping_preference":"NO_SHIPPING"},
       "transactions": [
         {
           "amount": {
             "total": totalAmount,
             "currency": defaultCurrency["currency"],
-            "details": {
-              "subtotal": subTotalAmount,
-              "shipping": shippingCost,
-              "shipping_discount":
-                  ((-1.0) * shippingDiscountCost).toString()
-            }
           },
           "description": "The payment transaction description.",
           "payment_options": {
             "allowed_payment_method": "INSTANT_FUNDING_SOURCE"
           },
-          "item_list": {
-            "items": items,
-              "shipping_address": isEnableShipping &&
-                isEnableAddress? {
-                "recipient_name": userFirstName +
-                    " " +
-                    userLastName,
-                "line1": addressStreet,
-                "line2": "",
-                "city": addressCity,
-                "country_code": addressCountry,
-                "postal_code": addressZipCode,
-                "phone": addressPhoneNumber,
-                "state": addressState
-              }: null,
-          }
         }
       ],
-      "note_to_payer": "Contact us for any questions on your order.",
       "redirect_urls": {
         "return_url": returnURL,
         "cancel_url": cancelURL

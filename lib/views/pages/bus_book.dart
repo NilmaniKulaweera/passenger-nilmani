@@ -7,7 +7,10 @@ class BusBook extends StatefulWidget {
   final List<int> selectedSeatNumbers;
   final String busType;
   final int totalPrice;
-  BusBook({this.count, this.selectedSeatNumbers, this.busType, this.totalPrice});
+  final String startingDestination;
+  final String endingDestination;
+  final String tripId;
+  BusBook({this.count, this.selectedSeatNumbers, this.busType, this.totalPrice, this.startingDestination, this.endingDestination, this.tripId});
 
   @override
   _BusBookState createState() => _BusBookState();
@@ -169,6 +172,10 @@ class _BusBookState extends State<BusBook> {
                             // payment done
                             print('order id: '+number);
                           },
+                          startingDestination: widget.startingDestination,
+                          endingDestination: widget.endingDestination,
+                          tripId: widget.tripId,
+                          selectedSeatNumbers: widget.selectedSeatNumbers
                         ),
                       ),
                     );
