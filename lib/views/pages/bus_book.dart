@@ -3,6 +3,8 @@ import 'package:string_validator/string_validator.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/PaypalPayment.dart';
 
 class BusBook extends StatefulWidget {
+  final String uid;
+  final String token;
   final int count;
   final List<int> selectedSeatNumbers;
   final String busType;
@@ -10,7 +12,7 @@ class BusBook extends StatefulWidget {
   final String startingDestination;
   final String endingDestination;
   final String tripId;
-  BusBook({this.count, this.selectedSeatNumbers, this.busType, this.totalPrice, this.startingDestination, this.endingDestination, this.tripId});
+  BusBook({this.uid, this.token, this.count, this.selectedSeatNumbers, this.busType, this.totalPrice, this.startingDestination, this.endingDestination, this.tripId});
 
   @override
   _BusBookState createState() => _BusBookState();
@@ -165,17 +167,16 @@ class _BusBookState extends State<BusBook> {
                 onPressed: () {
                   if (_formKey.currentState.validate()) {
                     // direct to the payment gateway
-                    Navigator.of(context).push(
+                    Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (BuildContext context) => PaypalPayment(
-                          onFinish: (number) async {
-                            // payment done
-                            print('order id: '+number);
-                          },
+                          uid: widget.uid,
+                          token: widget.token,
                           startingDestination: widget.startingDestination,
                           endingDestination: widget.endingDestination,
                           tripId: widget.tripId,
-                          selectedSeatNumbers: widget.selectedSeatNumbers
+                          selectedSeatNumbers: widget.selectedSeatNumbers,
+                          totalPrice: widget.totalPrice,
                         ),
                       ),
                     );

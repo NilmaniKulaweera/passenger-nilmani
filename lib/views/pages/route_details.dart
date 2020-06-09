@@ -113,8 +113,6 @@ class _RouteDetailsState extends State<RouteDetails> {
             uid: widget.uid, 
             token: widget.token, 
             fullRouteData: routeDetails[index],
-            startingDestination: widget.startingDestination,
-            endingDestination: widget.endingDestination,
           );
         }
       ),
@@ -126,9 +124,7 @@ class FullRouteDetailTile extends StatelessWidget {
   final String uid;
   final String token;
   final List<RouteData> fullRouteData;
-  final String startingDestination;
-  final String endingDestination;
-  FullRouteDetailTile({this.uid, this.token, this.fullRouteData, this.startingDestination, this.endingDestination});
+  FullRouteDetailTile({this.uid, this.token, this.fullRouteData});
 
   @override
   Widget build(BuildContext context) {
@@ -144,8 +140,6 @@ class FullRouteDetailTile extends StatelessWidget {
             uid: uid, 
             token: token, 
             route: fullRouteData[index],
-            startingDestination: startingDestination,
-            endingDestination: endingDestination,
           );
         }
       ),
@@ -157,9 +151,7 @@ class PartialRouteDetailTile extends StatelessWidget {
   final String uid;
   final String token;
   final RouteData route;
-  final String startingDestination;
-  final String endingDestination;
-  PartialRouteDetailTile({this.uid, this.token, this.route, this.startingDestination, this.endingDestination});
+  PartialRouteDetailTile({this.uid, this.token, this.route});
 
   @override
   Widget build(BuildContext context) {
@@ -214,8 +206,8 @@ class PartialRouteDetailTile extends StatelessWidget {
                           uid: uid, 
                           token: token, 
                           routeId: route.routeId,
-                          startingDestination: startingDestination,
-                          endingDestination: endingDestination,
+                          startingDestination: route.departureStop,
+                          endingDestination: route.arrivalStop,
                         )
                       ));
                       // show turn details

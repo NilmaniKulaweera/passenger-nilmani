@@ -7,13 +7,14 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 
 class PaypalPayment extends StatefulWidget {
-  final Function onFinish;
+  final String uid;
+  final String token;
   final String startingDestination;
   final String endingDestination;
   final String tripId;
   final List<int> selectedSeatNumbers;
   final int totalPrice;
-  PaypalPayment({this.onFinish, this.startingDestination, this.endingDestination, this.tripId, this.selectedSeatNumbers, this.totalPrice});
+  PaypalPayment({this.uid, this.token, this.startingDestination, this.endingDestination, this.tripId, this.selectedSeatNumbers, this.totalPrice});
 
   @override
   State<StatefulWidget> createState() {
@@ -61,7 +62,11 @@ class PaypalPaymentState extends State<PaypalPayment> {
           duration: Duration(seconds: 10),
           action: SnackBarAction(
             label: 'Close',
-            onPressed: () { },
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => PaymentFailurePage())
+              );
+            },
           ),
         );
         _scaffoldKey.currentState.showSnackBar(snackBar);
@@ -71,8 +76,6 @@ class PaypalPaymentState extends State<PaypalPayment> {
 
   Map<String, dynamic> getOrderParams() {
     // checkout invoice details
-    String totalAmount = '600.00';
-
     Map<String, dynamic> temp = {
       "intent": "sale",
       "payer": {"payment_method": "paypal"},
@@ -80,7 +83,7 @@ class PaypalPaymentState extends State<PaypalPayment> {
       "transactions": [
         {
           "amount": {
-            "total": totalAmount,
+            "total": widget.totalPrice,
             "currency": defaultCurrency["currency"],
           },
           "description": "The payment transaction description.",
@@ -104,11 +107,13 @@ class PaypalPaymentState extends State<PaypalPayment> {
     if (checkoutUrl != null) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).backgroundColor,
-          leading: GestureDetector(
-            child: Icon(Icons.arrow_back_ios),
-            onTap: () => Navigator.pop(context),
-          ),
+          backgroundColor: Colors.green[900],
+          title: Text(
+            'Pay Amount',
+            style: TextStyle(
+              color: Colors.white
+            ),
+          )
         ),
         body: WebView(
           initialUrl: checkoutUrl,
@@ -118,23 +123,31 @@ class PaypalPaymentState extends State<PaypalPayment> {
               final uri = Uri.parse(request.url);
               final payerID = uri.queryParameters['PayerID'];
               final paymentID = uri.queryParameters['paymentId'];
-              print('heloooooooo');
               print(uri);
               print ('return  $returnURL');
               
               if (payerID != null) {
                 services
-                    .executePayment(executeUrl, payerID, accessToken)
-                    .then((id) {
-                  widget.onFinish(id);
-                  Navigator.of(context).pop();
-                });
+                  .executePayment(executeUrl, payerID, accessToken)
+                  .then((id) {
+                    Navigator.of(context).pop();
+                  });
               } else {
                 Navigator.of(context).pop();
               }
               Navigator.of(context).pop();
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => PaymentSuccessPage(payerID: payerID, paymentID: paymentID))
+                builder: (context) => PaymentSuccessPage(
+                  uid: widget.uid,
+                  token: widget.token,
+                  startingDestination: widget.startingDestination,
+                  endingDestination: widget.endingDestination,
+                  tripId: widget.tripId,
+                  selectedSeatNumbers: widget.selectedSeatNumbers,
+                  totalPrice: widget.totalPrice,
+                  payerID: payerID, 
+                  paymentID: paymentID
+                ))
               );
             }
             if (request.url.contains(cancelURL)) {

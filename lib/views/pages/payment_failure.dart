@@ -5,7 +5,21 @@ class PaymentFailurePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Failure page"),
+        backgroundColor: Colors.green[900],
+        title: Text(
+          'Payment Failure',
+          style: TextStyle(
+            color: Colors.white
+          ),
+        )
+      ),
+      body: Container(
+        child: FlatButton(
+          child: Text('try again'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          }
+        ),
       ),
     );
   }

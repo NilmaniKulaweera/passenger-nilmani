@@ -220,7 +220,48 @@ class AuthController {
       return APIResponse<List<BusSeat>>(error: true, errorMessage: 'An error occured');
     }).
     catchError((error) => APIResponse<List<BusSeat>>(error: true, errorMessage: 'An error occured'));
-   }
+  }
+
+  Future<APIResponse<String>> bookSeats(
+    String uid, 
+    String token, 
+    String tripId, 
+    String startingDestination, 
+    String endingDestination,
+    List<int> selectedSeatNumbers,
+    String payerID,
+    String paymentID,
+  ) async {
+    // sign in the passenger when the email and password is given
+    String url = Constants.SERVER;
+    return http.post(
+      '$url/bookseats/$uid',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'seatIdArray': selectedSeatNumbers,
+	      'turnId': tripId, 
+	      'startStation': startingDestination, 
+	      'endStation': endingDestination,
+	      'paymentId': paymentID,
+	      'payerId': payerID
+      })
+    ).then ((response) {
+        print ('status code' + response.statusCode.toString());
+        if(response.statusCode == 200) {
+          Map<String, dynamic> data = jsonDecode(response.body);
+          return APIResponse<String>(data: data['message']); 
+        }
+        if(response.statusCode == 400) {
+          final error = jsonDecode(response.body);
+          return APIResponse<String>(error: true, errorMessage: error['error']);
+        }
+        return APIResponse<String>(error: true, errorMessage: 'An error occured');
+      }).
+      catchError((error) => APIResponse<String> (error: true, errorMessage: 'An error occured')); 
+  }
 
 }
 

@@ -182,6 +182,8 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
                     onPressed: () async {
                       if (count < 5 && count > 0) {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => BusBook(
+                          uid: widget.uid,
+                          token: widget.token,
                           count: count, 
                           selectedSeatNumbers: selectedSeatNumbers,
                           busType: widget.busType,
