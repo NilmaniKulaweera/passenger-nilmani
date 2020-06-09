@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:transport_booking_system_passenger_mobile/controllers/authController.dart';
 import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
+import 'package:transport_booking_system_passenger_mobile/models/busTripData.dart';
 
 class PaymentSuccessPage extends StatefulWidget {
   final String uid;
   final String token;
   final String startingDestination;
   final String endingDestination;
-  final String tripId;
+  final BusTripData trip;
   final List<int> selectedSeatNumbers;
   final int totalPrice;
   final String payerID;
   final String paymentID;
-  PaymentSuccessPage({this.uid, this.token, this.startingDestination, this.endingDestination, this.tripId, this.selectedSeatNumbers, this.totalPrice, this.payerID, this.paymentID});
+  PaymentSuccessPage({this.uid, this.token, this.startingDestination, this.endingDestination, this.trip, this.selectedSeatNumbers, this.totalPrice, this.payerID, this.paymentID});
 
   @override
   _PaymentSuccessPageState createState() => _PaymentSuccessPageState();
@@ -36,7 +38,7 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
     _apiResponse = await _auth.bookSeats(
       widget.uid, 
       widget.token, 
-      widget.tripId, 
+      widget.trip.tripId, 
       widget.startingDestination,
       widget.endingDestination,
       widget.selectedSeatNumbers,
@@ -51,6 +53,14 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
         successMessage = _apiResponse.data;
       }
     });
+  }
+
+  _formatDateTime(String dateTime) {
+    DateTime dt = DateTime.parse(dateTime);
+    dt = dt.add(Duration(hours: 5,minutes: 30));
+    String date = DateFormat.yMd().format(dt);
+    String time = DateFormat.jm().format(dt);
+    return ('$date at $time');
   }
 
   @override
@@ -72,20 +82,6 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
             color: Colors.grey[100],
             child: Column(
               children: <Widget>[
-                Container(
-                  alignment: Alignment.topRight,
-                  child: FlatButton.icon(
-                    icon: Icon(Icons.refresh),
-                    label: Text(
-                      'Refresh',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    onPressed: () async {
-                      // to load all th bus details and the trip details again
-                      _bookSeats();
-                    },
-                  ),
-                ),
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 30, 0, 30),
@@ -154,6 +150,52 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
                   style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
                 ),
               ),
+              ListTile(
+                title: Text(
+                  "Turn Details",
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  "Initial Departure Station",
+                  style: TextStyle(fontSize: 20.0),
+                ),
+                subtitle: Text(
+                  widget.trip.startStation,
+                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  "Departure Date and Time",
+                  style: TextStyle(fontSize: 20.0),
+                ),
+                subtitle: Text(
+                  _formatDateTime(widget.trip.departureTime),
+                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  "Final Arrival Station",
+                  style: TextStyle(fontSize: 20.0),
+                ),
+                subtitle: Text(
+                  widget.trip.endStation,
+                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  "Arrival Date and Time",
+                  style: TextStyle(fontSize: 20.0),
+                ),
+                subtitle: Text(
+                  _formatDateTime(widget.trip.arrivalTime),
+                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                ),
+              ),
               FlatButton(
                 child: Text(
                   "Go to main page",
@@ -171,8 +213,10 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop();
                 }
+              ),
+              SizedBox(
+                height: 15.0,
               )
             ],
           ),

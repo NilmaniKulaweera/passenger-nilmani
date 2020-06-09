@@ -1,6 +1,9 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:transport_booking_system_passenger_mobile/controllers/PaypalServices.dart';
+import 'package:transport_booking_system_passenger_mobile/controllers/authController.dart';
+import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
+import 'package:transport_booking_system_passenger_mobile/models/busTripData.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/payment_failure.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/payment_success.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -11,10 +14,10 @@ class PaypalPayment extends StatefulWidget {
   final String token;
   final String startingDestination;
   final String endingDestination;
-  final String tripId;
+  final BusTripData trip;
   final List<int> selectedSeatNumbers;
   final int totalPrice;
-  PaypalPayment({this.uid, this.token, this.startingDestination, this.endingDestination, this.tripId, this.selectedSeatNumbers, this.totalPrice});
+  PaypalPayment({this.uid, this.token, this.startingDestination, this.endingDestination, this.trip, this.selectedSeatNumbers, this.totalPrice});
 
   @override
   State<StatefulWidget> createState() {
@@ -29,7 +32,6 @@ class PaypalPaymentState extends State<PaypalPayment> {
   String accessToken;
   PaypalServices services = PaypalServices();
 
-  // you can change default currency according to your need
   Map<dynamic,dynamic> defaultCurrency = {"symbol": "USD ", "decimalDigits": 2, "symbolBeforeTheNumber": true, "currency": "USD"};
 
   bool isEnableShipping = false;
@@ -38,11 +40,39 @@ class PaypalPaymentState extends State<PaypalPayment> {
   String returnURL = 'return.example.com';
   String cancelURL= 'cancel.example.com';
 
+  final AuthController _auth = AuthController();
+  APIResponse<double> _apiResponse;
+  String errorMessage;
+  double currencyConvertFactor;
+  double priceInUSD;
+  String stringValue;
+  double priceInUSD2Decimals;
+  bool _isLoading;
+
+  void getUSDfromLKR() async {
+    setState(() { _isLoading = true; });
+    _apiResponse = await _auth.convertLKRtoUSD();
+    setState(() { 
+      if (_apiResponse.error){
+        _isLoading = false; 
+        errorMessage = _apiResponse.errorMessage;
+      } else {
+        _isLoading = false; 
+        currencyConvertFactor = _apiResponse.data;
+        print ('currencyConvertFactor - $currencyConvertFactor');
+        priceInUSD = widget.totalPrice * currencyConvertFactor;
+        print ('priceInUSD - $priceInUSD');
+        stringValue = priceInUSD.toStringAsFixed(2); 
+        priceInUSD2Decimals = double.parse(stringValue);
+  
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-
+    getUSDfromLKR();
     Future.delayed(Duration.zero, () async {
       try {
         accessToken = await services.getAccessToken();
@@ -83,7 +113,7 @@ class PaypalPaymentState extends State<PaypalPayment> {
       "transactions": [
         {
           "amount": {
-            "total": widget.totalPrice,
+            "total": priceInUSD2Decimals,
             "currency": defaultCurrency["currency"],
           },
           "description": "The payment transaction description.",
@@ -103,9 +133,8 @@ class PaypalPaymentState extends State<PaypalPayment> {
   @override
   Widget build(BuildContext context) {
     print(checkoutUrl);
-
     if (checkoutUrl != null) {
-      return Scaffold(
+      return _isLoading? Center(child: CircularProgressIndicator()) : Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green[900],
           title: Text(
@@ -142,7 +171,7 @@ class PaypalPaymentState extends State<PaypalPayment> {
                   token: widget.token,
                   startingDestination: widget.startingDestination,
                   endingDestination: widget.endingDestination,
-                  tripId: widget.tripId,
+                  trip: widget.trip,
                   selectedSeatNumbers: widget.selectedSeatNumbers,
                   totalPrice: widget.totalPrice,
                   payerID: payerID, 

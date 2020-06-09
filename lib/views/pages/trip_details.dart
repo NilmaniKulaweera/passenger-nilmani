@@ -117,9 +117,9 @@ class TripTile extends StatelessWidget {
               color: Colors.grey[700],
             ),
             title: Text(
-                  '${trip.startStation} to ${trip.endStation}',
-                  style: TextStyle(fontSize: 20.0),
-                ),
+              '${trip.startStation} to ${trip.endStation}',
+              style: TextStyle(fontSize: 20.0),
+            ),
           ),
           ListTile(
             title: Text(
@@ -161,7 +161,7 @@ class TripTile extends StatelessWidget {
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
             ),
           ),
-          FlatButton.icon( // to view the bookings of the current trip
+          FlatButton.icon( 
             label: Text(
               'View Bookings',
               style: TextStyle(fontSize: 20.0),
@@ -176,11 +176,11 @@ class TripTile extends StatelessWidget {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => BusLayoutWrapper(
                   uid: uid, token: token, 
-                  tripId: trip.tripId, 
                   seatPrice: trip.normalSeatPrice, 
                   busType: trip.busType,
                   startingDestination: startingDestination,
                   endingDestination: endingDestination,
+                  trip: trip,
                 )
               ));   
             },

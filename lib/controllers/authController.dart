@@ -263,5 +263,22 @@ class AuthController {
       catchError((error) => APIResponse<String> (error: true, errorMessage: 'An error occured')); 
   }
 
+  Future<APIResponse<double>> convertLKRtoUSD() async {
+  // get the current and upcoming active turns assigned to the conductor
+  String url = "https://free.currconv.com/api/v7/convert?q=LKR_USD&compact=ultra&apiKey=737ec7e1568aac2e1bd5";
+  return http.get('$url')
+    .then ((response) {
+      print ('heloo');
+      if(response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        return APIResponse<double>(data: data['LKR_USD']);
+      } 
+      return APIResponse<double>(error: true, errorMessage: 'An error occured');
+    }).
+    catchError((error) {
+      return APIResponse<double>(error: true, errorMessage: 'An error occured');
+    });
+}
+
 }
 

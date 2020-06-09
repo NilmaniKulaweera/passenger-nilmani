@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:transport_booking_system_passenger_mobile/controllers/authController.dart';
 import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
 import 'package:transport_booking_system_passenger_mobile/models/busSeat.dart';
+import 'package:transport_booking_system_passenger_mobile/models/busTripData.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/bus_book.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/bus_layouts/bus_layout1.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/bus_layouts/bus_layout2.dart';
@@ -11,12 +12,12 @@ import 'package:transport_booking_system_passenger_mobile/views/pages/bus_layout
 class BusLayoutWrapper extends StatefulWidget {
   final String uid;
   final String token;
-  final String tripId;
   final int seatPrice;
   final String busType;
   final String startingDestination;
   final String endingDestination;
-  BusLayoutWrapper({this.uid, this.token, this.tripId, this.seatPrice, this.busType, this.startingDestination, this.endingDestination});
+  final BusTripData trip;
+  BusLayoutWrapper({this.uid, this.token, this.seatPrice, this.busType, this.startingDestination, this.endingDestination, this.trip});
 
   @override
   _BusLayoutWrapperState createState() => _BusLayoutWrapperState();
@@ -61,7 +62,7 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
   _fetchSeatDetails() async {
     setState(() { _isLoading = true; });
     // get seat details of the particular trip
-    _apiResponse = await _auth.getBookings(widget.uid, widget.token, widget.tripId);
+    _apiResponse = await _auth.getBookings(widget.uid, widget.token, widget.trip.tripId);
     setState(() { 
       if (_apiResponse.error){
         _isLoading = false; 
@@ -190,7 +191,8 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
                           totalPrice: totalAmount,
                           startingDestination: widget.startingDestination,
                           endingDestination: widget.endingDestination,
-                          tripId: widget.tripId,
+                          //tripId: widget.tripId,
+                          trip: widget.trip,
                           //seatPrice: widget.seatPrice,
                         )));
                       } else if (count == 0) {
