@@ -26,6 +26,7 @@ class BusLayoutWrapper extends StatefulWidget {
 class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
   final AuthController _auth = AuthController();
   APIResponse<List<BusSeat>> _apiResponse;
+  APIResponse<String> _apiResponse2;
   bool _isLoading;
   List<BusSeat>  busSeatDetails;
   String errorMessage;
@@ -37,7 +38,7 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
 
   countAvailableSeats() {
     for(var i=0; i<busSeatDetails.length;i++){
-      if (busSeatDetails[i].booking == null) {
+      if (busSeatDetails[i].status == "Available") {
         availableSeats = availableSeats + 1;
       }
     }
@@ -264,9 +265,46 @@ class _BusLayoutWrapperState extends State<BusLayoutWrapper> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5)
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       print (availableSeats);
-                      // Navigate to 'add to waiting list' page
+                      _apiResponse2 = await _auth.addToWaitingList(widget.uid, widget.token, widget.trip.tripId);
+                      final result = await showDialog(
+                        context: context,
+                        builder: (context) => _apiResponse2.error? AlertDialog(
+                          title: Text(_apiResponse2.errorMessage),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text(
+                                'OK',
+                                style: TextStyle(
+                                  color: Colors.green[700],
+                                  fontSize: 15.0,
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ) : AlertDialog(
+                          title: Text(_apiResponse2.data),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text(
+                                'OK',
+                                style: TextStyle(
+                                  color: Colors.green[700],
+                                  fontSize: 15.0,
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        )
+                      );
+                      return result;
                     },
                   ),
                 )

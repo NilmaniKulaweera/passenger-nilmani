@@ -168,6 +168,15 @@ class AuthController {
       busType: "2x2 bus"
     );
     BusTripData trip2 = BusTripData(
+      tripId: "IB5CS5JD7foW57HVUVFo 2020-06-11T07:00:00.750Z",
+      departureTime: "2020-06-11T07:00:00.750Z",
+      startStation: "Kurunegala",
+      arrivalTime: "2020-06-11T10:15:00.750Z",
+      endStation: "Colombo",
+      normalSeatPrice: 200,
+      busType: "3x2 bus"
+    );
+    BusTripData trip3 = BusTripData(
       tripId: "IB5CS5JD7foW57HVUVFo 2020-06-13T07:00:00.750Z",
       departureTime: "2020-06-13T07:00:00.750Z",
       startStation: "Kurunegala",
@@ -176,7 +185,16 @@ class AuthController {
       normalSeatPrice: 200,
       busType: "3x2 bus"
     );
-    turns = [trip1, trip2];
+    BusTripData trip4 = BusTripData(
+      tripId: "IB5CS5JD7foW57HVUVFo 2020-06-14T07:00:00.750Z",
+      departureTime: "2020-06-14T07:00:00.750Z",
+      startStation: "Kurunegala",
+      arrivalTime: "2020-06-14T10:15:00.750Z",
+      endStation: "Colombo",
+      normalSeatPrice: 200,
+      busType: "3x2 bus"
+    );
+    turns = [trip1, trip2, trip3, trip4];
     return APIResponse<List<BusTripData>>(data: turns);
   }
 
@@ -257,6 +275,32 @@ class AuthController {
         if(response.statusCode == 400) {
           final error = jsonDecode(response.body);
           return APIResponse<String>(error: true, errorMessage: error['error']);
+        }
+        return APIResponse<String>(error: true, errorMessage: 'An error occured');
+      }).
+      catchError((error) => APIResponse<String> (error: true, errorMessage: 'An error occured')); 
+  }
+
+  Future<APIResponse<String>> addToWaitingList(String uid, String token, String tripId) async {
+    // sign in the passenger when the email and password is given
+    String url = Constants.SERVER;
+    return http.post(
+      '$url/addtowaiting/$uid',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'turnId': tripId,
+      })
+    ).then ((response) {
+        if(response.statusCode == 200) {
+          Map<String, dynamic> data = jsonDecode(response.body);
+          return APIResponse<String>(data: data['message']); 
+        }
+        if(response.statusCode == 400) {
+          final error = jsonDecode(response.body);
+          return APIResponse<String>(error: true, errorMessage: error['message']);
         }
         return APIResponse<String>(error: true, errorMessage: 'An error occured');
       }).
