@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:transport_booking_system_passenger_mobile/models/apiResponse.dart';
+import 'package:transport_booking_system_passenger_mobile/models/busBookindData.dart';
 import 'package:transport_booking_system_passenger_mobile/models/userData.dart';
 import 'package:transport_booking_system_passenger_mobile/constants.dart';
 import 'package:transport_booking_system_passenger_mobile/models/newUserRegister.dart';
@@ -305,6 +306,68 @@ class AuthController {
         return APIResponse<String>(error: true, errorMessage: 'An error occured');
       }).
       catchError((error) => APIResponse<String> (error: true, errorMessage: 'An error occured')); 
+  }
+
+  Future<APIResponse<List<BusBookingData>>> getActiveBookings(String uid, String loginToken) async {
+    // get the current and upcoming active turns assigned to the conductor
+    String url = Constants.SERVER;
+    String token = loginToken;
+    List<BusBookingData> activeBookings = [];
+    return http.get(
+      '$url/getactivebookings/$uid',
+      
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    ).then ((response) {
+      if(response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        for(var i=0; i<data["turns"].length;i++){
+          activeBookings.add(BusBookingData.fromJson(data["turns"][i]));
+        }
+        return APIResponse<List<BusBookingData>>(data: activeBookings);
+      } 
+      if(response.statusCode == 400) {
+        final error = jsonDecode(response.body);
+        return APIResponse<List<BusBookingData>>(error: true, errorMessage: error['error']);
+      }
+      return APIResponse<List<BusBookingData>>(error: true, errorMessage: 'An error occured');
+    }).
+    catchError((error) {
+      return APIResponse<List<BusBookingData>>(error: true, errorMessage: 'An error occured');
+    });
+  }
+
+  Future<APIResponse<List<BusBookingData>>> getPastBookings(String uid, String loginToken) async {
+    // get the current and upcoming active turns assigned to the conductor
+    String url = Constants.SERVER;
+    String token = loginToken;
+    List<BusBookingData> activeBookings = [];
+    return http.get(
+      '$url/getpastbookings/$uid',
+      
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    ).then ((response) {
+      if(response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        for(var i=0; i<data["turns"].length;i++){
+          activeBookings.add(BusBookingData.fromJson(data["turns"][i]));
+        }
+        return APIResponse<List<BusBookingData>>(data: activeBookings);
+      } 
+      if(response.statusCode == 400) {
+        final error = jsonDecode(response.body);
+        return APIResponse<List<BusBookingData>>(error: true, errorMessage: error['error']);
+      }
+      return APIResponse<List<BusBookingData>>(error: true, errorMessage: 'An error occured');
+    }).
+    catchError((error) {
+      return APIResponse<List<BusBookingData>>(error: true, errorMessage: 'An error occured');
+    });
   }
 
   Future<APIResponse<double>> convertLKRtoUSD() async {

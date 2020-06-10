@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:transport_booking_system_passenger_mobile/views/pages/active_booking.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/auth.dart';
+import 'package:transport_booking_system_passenger_mobile/views/pages/past_booking.dart';
 import 'package:transport_booking_system_passenger_mobile/views/shared_widgets/page_widget.dart';
 import 'package:transport_booking_system_passenger_mobile/views/pages/route_details.dart';
 
@@ -15,6 +17,10 @@ class _HomeState extends State<Home> {
   String token;
   bool _isLoading = true;
   final _formKey = GlobalKey<FormState>();
+
+  static const String activeBookings = "Active Bookings";
+  static const String pastBookings = "Past Bookings";
+  static const List<String> choices = <String>[activeBookings, pastBookings];
 
   String startingDestination = '';
   String endingDestination = '';
@@ -82,6 +88,17 @@ class _HomeState extends State<Home> {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => LoginPage())
               );
+            },
+          ),
+          PopupMenuButton<String>(
+            onSelected: choiceAction,
+            itemBuilder: (BuildContext context) {
+              return choices.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
             },
           ),
         ],
@@ -182,4 +199,14 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+  void choiceAction(String choice) {
+    if (choice == pastBookings){
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PastBooking(uid: uid, token: token)));
+    }
+    if (choice == activeBookings){
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => ActiveBooking(uid: uid, token: token)));
+    }
+  }
+
 }
